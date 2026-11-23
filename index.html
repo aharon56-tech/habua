@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>הבועה – שיעור הייפ וקריפטו</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&display=swap">
+<style>
+/*
+VOICE: energetic classroom show, smart not childish
+IDEA: a bubblegum bubble – inflated, shiny, about to pop
+PICTURE: price charts that swell and burst; news cards like phone feeds
+COLOUR and TYPE: bubblegum pink fields, deep plum ink, acid lime accent; Rubik 900 titles
+LAYOUT: one slide per screen on the projector, phone-first single column for students
+*/
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#1a0d2e);--ink:light-dark(#1e0f3a,#fbeaf3);--soft:light-dark(#fff0f6,#26143f);
+--pink:#ff3d7f;--pinkd:#d81b60;--plum:#1e0f3a;--lime:#d4ff3a;--mut:light-dark(#6b5a80,#c9b5d8);--line:light-dark(#f1d3e1,#3d2560);
+--ok:#12a150;--bad:#e0243c;--sus:#f59e0b}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Rubik,"Segoe UI",Arial,sans-serif;overflow-x:clip}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;border-radius:14px;min-height:44px;padding:10px 18px;font-weight:700}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+input,textarea{font-size:16px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:var(--bg);width:100%}
+.view{display:none}.view.on{display:block}
+/* ===== teacher ===== */
+#teacher.on{display:grid;grid-template-rows:auto 1fr auto;height:100dvh}
+.top{display:flex;gap:10px;align-items:center;padding:10px 20px;border-bottom:2px solid var(--line);flex-wrap:wrap}
+.top b{font-weight:900;color:var(--pink);font-size:20px}
+.top .sp{flex:1}
+.ghost{background:var(--soft);color:var(--ink);font-weight:500;padding:8px 14px}
+.stage{position:relative;overflow:hidden}
+.slide{display:none;position:absolute;inset:0;overflow:auto;padding:clamp(24px,4vw,64px) clamp(24px,6vw,110px);flex-direction:column;justify-content:center;gap:22px}
+.slide.on{display:flex}
+.slide.pinkbg{background:var(--pink);color:#fff}
+h1,h2,h3{margin:0;line-height:1.08;text-wrap:balance;font-weight:900}
+h1{font-size:clamp(56px,10vw,150px);letter-spacing:-1px}
+h2{font-size:clamp(34px,4.4vw,64px)}
+h3{font-size:clamp(22px,2.2vw,32px)}
+.lead{font-size:clamp(20px,2.3vw,34px);line-height:1.35;margin:0;max-width:34ch}
+.big{font-size:clamp(20px,2vw,30px);line-height:1.45}
+.mut{color:var(--mut)}
+.tag{display:inline-block;background:var(--lime);color:var(--plum);font-weight:700;border-radius:999px;padding:4px 14px;font-size:clamp(15px,1.4vw,20px);align-self:flex-start}
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr))}
+.card{background:var(--soft);border-radius:22px;padding:22px 24px;font-size:clamp(18px,1.7vw,26px);line-height:1.4}
+.card strong{display:block;font-size:1.15em;margin-bottom:6px;color:var(--pinkd)}
+:root[data-theme=dark] .card strong{color:var(--pink)}
+.row{display:flex;gap:28px;align-items:center;flex-wrap:wrap}
+.row>*{flex:1 1 320px}
+.chart{width:100%;height:auto;max-height:48vh;display:block}
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;gap:12px}
+ol.steps li{counter-increment:s;display:flex;gap:16px;align-items:center;font-size:clamp(18px,1.9vw,28px);background:var(--soft);border-radius:18px;padding:12px 18px}
+ol.steps li::before{content:counter(s);flex:none;width:46px;height:46px;border-radius:50%;background:var(--pink);color:#fff;display:grid;place-items:center;font-weight:900}
+.qr{background:#fff;padding:14px;border-radius:18px;display:inline-grid;place-items:center;min-width:240px;min-height:240px;color:#1e0f3a;text-align:center;font-size:14px}
+.qr img,.qr canvas{display:block}
+.code{font-size:clamp(40px,5vw,72px);font-weight:900;letter-spacing:6px;background:var(--plum);color:var(--lime);border-radius:20px;padding:6px 26px;display:inline-block;direction:ltr}
+.foot{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 20px;border-top:2px solid var(--line)}
+.foot .nav{background:var(--pink);color:#fff;min-width:120px}
+.notes{display:none;background:var(--plum);color:#fbeaf3;padding:14px 22px;font-size:17px;max-height:26vh;overflow:auto}
+.notes.on{display:block}
+.notes b{color:var(--lime)}
+/* game slide */
+.news{background:var(--soft);border-radius:26px;padding:26px 30px;border-inline-start:10px solid var(--pink)}
+.news .src{font-weight:700;color:var(--pinkd);font-size:clamp(17px,1.5vw,22px)}
+:root[data-theme=dark] .news .src{color:var(--pink)}
+.news p{margin:8px 0 0;font-size:clamp(22px,2.4vw,36px);line-height:1.35}
+.price{font-size:clamp(56px,7vw,110px);font-weight:900;line-height:1;direction:ltr;text-align:right;white-space:nowrap}
+.chg{font-weight:700;font-size:clamp(20px,2vw,30px);direction:ltr;text-align:right}
+.up{color:var(--ok)}.down{color:var(--bad)}
+.hint{background:var(--lime);color:var(--plum);border-radius:16px;padding:12px 18px;font-size:clamp(18px,1.7vw,26px);font-weight:500}
+.lb{display:grid;gap:10px}
+.lbrow{display:grid;grid-template-columns:minmax(0,14ch) minmax(0,1fr) 9ch;gap:14px;align-items:center;font-size:clamp(18px,1.8vw,26px)}
+.bar{height:36px;border-radius:10px;background:var(--pink)}
+.lbin{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.lbin div{display:flex;gap:6px}
+.verdict{display:inline-block;color:#fff;font-weight:900;border-radius:14px;padding:6px 18px;font-size:clamp(24px,2.6vw,40px)}
+.v-scam{background:var(--bad)}.v-sus{background:var(--sus)}.v-ok{background:var(--ok)}
+.post{background:var(--soft);border-radius:26px;padding:26px 30px;max-width:900px}
+.post .who{font-weight:700;color:var(--mut)}
+.post p{font-size:clamp(22px,2.5vw,38px);line-height:1.35;margin:10px 0 0}
+.opts{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr))}
+.opt{background:var(--soft);border-radius:16px;padding:14px 18px;font-size:clamp(18px,1.8vw,28px);border:3px solid transparent}
+.opt.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,var(--bg))}
+/* plan */
+#plan{max-width:980px;margin:0 auto;padding:clamp(24px,4vw,56px) max(5vw,16px)}
+#plan h1{font-size:clamp(36px,5vw,60px);color:var(--pink)}
+#plan h2{font-size:clamp(24px,3vw,34px);margin-top:36px}
+#plan table{width:100%;border-collapse:collapse;margin-top:14px}
+#plan th,#plan td{text-align:start;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+#plan td:first-child{white-space:nowrap;font-weight:700;color:var(--pinkd)}
+/* student */
+#student{max-width:560px;margin:0 auto;padding:14px 14px 60px}
+.sh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 2px 12px}
+.sh b{font-weight:900;font-size:24px;color:var(--pink)}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--soft);padding:6px;border-radius:16px;margin-bottom:14px}
+.tabs button{background:transparent;color:var(--ink);font-size:15px;padding:8px 4px}
+.tabs button.on{background:var(--pink);color:#fff}
+.box{background:var(--soft);border-radius:20px;padding:18px;margin-bottom:12px}
+.box h3{font-size:22px;margin-bottom:8px}
+.pf{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center}
+.pf div{background:var(--bg);border-radius:12px;padding:8px 4px}
+.pf small{display:block;color:var(--mut);font-size:13px}
+.pf span{font-weight:900;font-size:18px;white-space:nowrap}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.buy{background:var(--ok);color:#fff}.sell{background:var(--bad);color:#fff}.hold{background:var(--plum);color:#fff;grid-column:1/-1}
+:root[data-theme=dark] .hold{background:#4b2d78}
+.pri{background:var(--pink);color:#fff;width:100%;margin-top:10px}
+.err{color:var(--bad);font-weight:700;margin-top:6px;min-height:1.4em}
+.sp-news{border-inline-start:6px solid var(--pink);padding-inline-start:12px}
+.chs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.chs button{background:var(--bg);border:2px solid var(--line);font-size:15px;padding:8px 2px}
+.chs button.sel{border-color:var(--pink);background:var(--pink);color:#fff}
+.res{font-weight:700;margin-top:8px}
+.qopt{display:block;width:100%;text-align:start;background:var(--bg);border:2px solid var(--line);margin-top:6px;font-weight:500}
+.qopt.sel{border-color:var(--pink)}
+.qopt.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,var(--bg))}
+.qopt.wrong{border-color:var(--bad)}
+.hist{margin:8px 0 0;padding-inline-start:20px;font-size:15px}
+.reset{background:transparent;color:var(--mut);font-weight:500;font-size:14px;text-decoration:underline}
+@media(max-width:600px){.lbrow{grid-template-columns:minmax(0,9ch) minmax(0,1fr) 8ch}}
+@media(prefers-reduced-motion:no-preference){.slide.on{animation:pop .35s ease-out}@keyframes pop{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:none}}}
+</style>
+</head>
+<body>
+
+<!-- ================= TEACHER ================= -->
+<div id="teacher" class="view">
+  <div class="top">
+    <b>הבועה</b><span class="mut" id="counter"></span><span class="sp"></span>
+    <button class="ghost" id="bNotes">הערות למורה (N)</button>
+    <button class="ghost" id="bFull">מסך מלא (F)</button>
+    <a class="ghost" href="#plan" style="text-decoration:none;border-radius:14px;padding:10px 14px">מערך שיעור</a>
+  </div>
+  <div class="stage" id="stage">
+
+    <section class="slide pinkbg" data-notes="<b>פתיחה (דקה).</b> לא מסבירים כלום עדיין. שואלים: מי מכיר מישהו שקנה קריפטו? מי שמע על מטבע שעלה פי 100? אפשר לבקש מהקבוצות כבר עכשיו לסרוק את הקוד.">
+      <span class="tag">חינוך פיננסי · כיתה ט'</span>
+      <h1>הבועה</h1>
+      <p class="lead">הייפ, קריפטו, ואיך הופכים 10,000 ₪ לכמעט כלום, ביומיים.</p>
+    </section>
+
+    <section class="slide" id="s-hook" data-notes="<b>הוק (4 דק').</b> בשלב הראשון רואים רק את העלייה. עושים הצבעה: מי היה קונה? מי היה מוכר? רק אז לוחצים ״הבא״ ומגלים את הקריסה. הגרף מבוסס על מקרה אמיתי, מטבע Squid Game מ-2021. נחזור אליו בהמשך.">
+      <span class="tag" id="hookTag">מטבע חדש · החודשיים האחרונים</span>
+      <h2 id="hookH">הייתם קונים?</h2>
+      <svg class="chart" viewBox="0 0 900 340" id="hookSvg" aria-label="גרף מחיר"></svg>
+      <p class="lead" id="hookP">מ-1 ₪ ל-1,000 ₪ בתוך שבועות. כל החברים שלכם כבר בפנים.</p>
+    </section>
+
+    <section class="slide" data-notes="<b>בועת הצבעונים (3 דק').</b> המסר: הדפוס לא המציאו בטיקטוק. היסטוריונים מתווכחים עד כמה הבועה הייתה קיצונית. כדאי לציין את זה, כי זה מראה לתלמידים שגם סיפורים מפורסמים צריך לבדוק.">
+      <span class="tag">הולנד, 1637</span>
+      <h2>לפני 400 שנה, זה היה צבעוני</h2>
+      <div class="grid">
+        <div class="card"><strong>ההייפ</strong>פקעות של צבעונים נדירים הפכו לסמל סטטוס. אנשים קנו פקעות רק כדי למכור אותן ביותר כסף, כבר למחרת.</div>
+        <div class="card"><strong>השיא</strong>לפי הסיפורים, פקעת אחת נמכרה במחיר של בית באמסטרדם.</div>
+        <div class="card"><strong>הפיצוץ</strong>בפברואר 1637 הקונים פשוט הפסיקו להגיע, והמחירים קרסו בתוך ימים.</div>
+      </div>
+      <p class="big mut">היסטוריונים מתווכחים עד כמה זה היה קיצוני, אבל הדפוס חוזר שוב ושוב.</p>
+    </section>
+
+    <section class="slide" data-notes="<b>קריפטו בקצרה (3 דק').</b> לא נכנסים לטכנולוגיה. הנקודה החשובה היא הכרטיס השלישי: ליצור מטבע זה קל וזול, ולכן יש המון מטבעות שנוצרו כבדיחה או כהונאה. לא כל קריפטו הוא הונאה, וגם את זה כדאי להגיד.">
+      <span class="tag">שתי דקות על קריפטו</span>
+      <h2>מה זה בכלל מטבע קריפטו?</h2>
+      <div class="grid">
+        <div class="card"><strong>כסף דיגיטלי</strong>אין שטרות ואין מטבעות. הכל נמצא ברשת. הראשון והמפורסם הוא ביטקוין (2009).</div>
+        <div class="card"><strong>ספר חשבונות ציבורי</strong>כל העברה נרשמת ב״בלוקצ'יין״, רשימה שכולם יכולים לראות ואי אפשר למחוק ממנה.</div>
+        <div class="card"><strong>כל אחד יכול להנפיק</strong>ליצור מטבע חדש לוקח דקות ועולה מעט מאוד. לכן יש מספר עצום של מטבעות, וחלק גדול מהם נוצר כבדיחה או כהונאה.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-notes="<b>מחיר מול ערך (3 דק').</b> שואלים: כמה שווה כרטיס פוקימון נדיר? למה? מכאן עוברים לבועה. ״תאוריית הטיפש הגדול יותר״: אני קונה ביוקר לא כי זה שווה, אלא כי אני מאמין שמישהו אחר יקנה ממני ביותר. השאלה היא מה קורה כשנגמרים הטיפשים.">
+      <span class="tag">המושג החשוב של היום</span>
+      <h2>מחיר ≠ ערך</h2>
+      <div class="grid">
+        <div class="card"><strong>מחיר</strong>כמה מישהו מוכן לשלם <u>עכשיו</u>.</div>
+        <div class="card"><strong>ערך</strong>מה הדבר באמת נותן: רווחים, שימוש, הנאה, פתרון לבעיה.</div>
+        <div class="card"><strong>בועה</strong>המחיר מתנתק מהערך. קונים רק כי מאמינים שמישהו אחר יקנה מכם ביותר. זו ״תאוריית הטיפש הגדול יותר״.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-notes="<b>מחזור הבועה (3 דק').</b> מבקשים מהתלמידים לשים לב לציטוטים. במשחק הם ישמעו בדיוק את המשפטים האלה. שאלה: באיזה שלב רוב האנשים קונים? (בהתלהבות ובשיא.)">
+      <span class="tag">כמעט כל בועה נראית ככה</span>
+      <h2>מחזור החיים של בועה</h2>
+      <svg class="chart" viewBox="0 0 1000 380" aria-label="מחזור הבועה">
+        <path d="M30 330 C120 325 160 310 210 290 S330 210 400 150 S470 40 520 40 S560 90 590 120 S630 90 650 100 S700 240 760 290 S860 320 970 300" fill="none" stroke="#ff3d7f" stroke-width="9" stroke-linecap="round"/>
+        <g font-family="Rubik,Arial" font-size="24" font-weight="700" fill="currentColor" text-anchor="middle">
+          <text x="120" y="300">התחלה שקטה</text>
+          <text x="300" y="215">תשומת לב</text>
+          <text x="380" y="110">התלהבות</text>
+          <text x="520" y="24">שיא: ״הפעם זה שונה!״</text>
+          <text x="720" y="110">הכחשה: ״זה רק תיקון״</text>
+          <text x="790" y="250">פאניקה</text>
+          <text x="900" y="360">חזרה לקרקע</text>
+        </g>
+      </svg>
+    </section>
+
+    <section class="slide" data-notes="<b>למה המוח נופל בזה (3 דק').</b> לבקש דוגמה מהחיים לכל כרטיס: נעליים, אוזניות, סקינים. ״הטיית השורד״: שומעים רק על מי שהרוויח, כי מי שהפסיד לא מספר.">
+      <span class="tag">פסיכולוגיה</span>
+      <h2>למה גם אנשים חכמים נופלים בזה?</h2>
+      <div class="grid">
+        <div class="card"><strong>FOMO</strong>הפחד להחמיץ. כואב יותר לפספס רווח של חבר מאשר להפסיד כסף משלך.</div>
+        <div class="card"><strong>הוכחה חברתית</strong>אם כולם קונים, זה בטח נכון. (אבל אם כולם כבר קנו, מי נשאר לקנות?)</div>
+        <div class="card"><strong>הטיית השורד</strong>שומעים רק על מי שהרוויח. מי שהפסיד שותק.</div>
+        <div class="card"><strong>דחיפות</strong>״רק היום!״ ״נשארו 50 מקומות!״ לחץ זמן מכבה את החשיבה.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-notes="<b>אינפלואנסרים (3 דק').</b> מקרה אמיתי: באוקטובר 2022 רשות ניירות הערך האמריקאית (SEC) קנסה את קים קרדשיאן ב-1.26 מיליון דולר. היא קיבלה 250 אלף דולר על פוסט אחד שקידם את EthereumMax ולא ציינה שקיבלה כסף. שאלה לכיתה: איך יודעים אם פוסט ממומן?">
+      <span class="tag">מי משלם על הפוסט?</span>
+      <h2>אינפלואנסרים וקריפטו</h2>
+      <div class="row">
+        <div class="card"><strong>מקרה אמיתי, 2022</strong>קים קרדשיאן קיבלה 250,000 דולר על פוסט אחד שקידם מטבע קריפטו, ולא סיפרה שקיבלה כסף. הרשויות בארה״ב קנסו אותה ב-1.26 מיליון דולר.</div>
+        <div class="card"><strong>מה לשאול על כל פוסט</strong>האם כתוב #ad, ״שיתוף פעולה״ או ״ממומן״? האם יש מידע אמיתי, או רק ״הולך לירח 🚀״? ומי מרוויח מזה שאני קונה?</div>
+      </div>
+    </section>
+
+    <section class="slide" data-notes="<b>Pump &amp; Dump ו-Rug Pull (3 דק').</b> Squid Game Token (2021): המחיר עלה בעשרות אלפי אחוזים בתוך כמה שבועות. הקונים גילו שהם לא יכולים למכור. אז המפתחים מכרו הכל, והמחיר צנח לכמעט אפס בתוך דקות. זה הגרף מתחילת השיעור.">
+      <span class="tag">ככה עובדת ההונאה</span>
+      <h2>Pump &amp; Dump ו-Rug Pull</h2>
+      <ol class="steps">
+        <li>יוצרים מטבע ושומרים לעצמם חלק ענק ממנו</li>
+        <li>מנפחים (Pump): אינפלואנסרים, קבוצות טלגרם, שמועות</li>
+        <li>אנשים קונים מתוך FOMO, והמחיר מזנק</li>
+        <li>בשיא, היוצרים מוכרים הכל (Dump)</li>
+        <li>Rug Pull: ״מושכים את השטיח״, נעלמים עם הכסף, והמחיר צונח לאפס</li>
+      </ol>
+    </section>
+
+    <section class="slide" data-notes="<b>הסבר המשחק (5 דק').</b> מחלקים ל-5 קבוצות של 4. טלפון אחד לקבוצה. כל קבוצה סורקת, בוחרת שם ומחכה לקוד. חשוב להדגיש: אין תשובה נכונה, רק החלטות, ומחליטים כקבוצה. כל סבב לוקח בערך 2.5 דקות.">
+      <span class="tag">המשחק · 30 דקות</span>
+      <div class="row">
+        <div>
+          <h2>שוק הבועה</h2>
+          <ol class="steps" style="margin-top:18px">
+            <li>קבוצות של 4, טלפון אחד לקבוצה</li>
+            <li>כל קבוצה מתחילה עם 10,000 ₪ וירטואליים</li>
+            <li>10 סבבים. בכל סבב: קוד מהמסך, חדשות, החלטה</li>
+            <li>קונים, מוכרים או מחזיקים. מנצחת הקבוצה שמסיימת עם הכי הרבה כסף</li>
+          </ol>
+        </div>
+        <div style="flex:0 1 300px;text-align:center"><div class="qr" id="qr2"></div><p class="big">סרקו ובחרו שם לקבוצה</p></div>
+      </div>
+    </section>
+
+    <section class="slide" id="s-game" data-notes="<b>סבבי המשחק.</b> בכל סבב: מקריאים את החדשות בקול ונותנים לקבוצות כ-90 שניות להחליט. החץ מעביר לסבב הבא. כפתור ״רמז״ מציג מה היה צריך לשים לב אליו. מומלץ להשאיר אותו כבוי במהלך המשחק ולהשתמש בו בסיכום. בסבב 10 אי אפשר כבר למכור.">
+      <div class="row" style="align-items:flex-start">
+        <div style="flex:2 1 460px;display:grid;gap:18px">
+          <div class="row" style="gap:12px"><span class="tag" id="gRound" style="flex:none"></span><span class="big mut" id="gSrc" style="flex:none"></span></div>
+          <div class="news"><div class="src">חדשות $TCAT · חתולטורבו</div><p id="gText"></p></div>
+          <div class="hint" id="gHint" hidden></div>
+          <div class="row" style="gap:12px"><button class="ghost" id="bHint" style="flex:none">הצג רמז</button></div>
+        </div>
+        <div style="flex:1 1 300px;display:grid;gap:12px;justify-items:end">
+          <div class="mut big">מחיר למטבע</div>
+          <div class="price" id="gPrice"></div>
+          <div class="chg" id="gChg"></div>
+          <svg class="chart" viewBox="0 0 400 200" id="gSvg" style="max-height:28vh"></svg>
+          <div class="mut big">קוד לסבב</div>
+          <div class="code" id="gCode"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-notes="<b>תוצאות (5 דק').</b> כל קבוצה מקריאה את הסכום הסופי שמופיע אצלה בטלפון, ומקלידים אותו כאן. כדאי לשאול את הקבוצה שהפסידה הכי הרבה: ״מתי הרגשתם הכי בטוחים?״">
+      <span class="tag">התוצאות</span>
+      <h2>מי יצא מהבועה בזמן?</h2>
+      <div class="lbin" id="lbIn"></div>
+      <div class="lb" id="lb"></div>
+    </section>
+
+    <section class="slide" data-notes="<b>הרמזים שפספסתם.</b> עוברים על הרשימה ושואלים: מי שם לב לרמז הזה בזמן? מה עשיתם איתו?">
+      <span class="tag">חשיפה</span>
+      <h2>הרמזים היו שם כל הזמן</h2>
+      <div class="grid" id="hintsAll"></div>
+    </section>
+
+    <section class="slide" data-notes="<b>דיון (10 דק').</b> בוחרים 2-3 שאלות. אפשר לתת לכל קבוצה דקה לדון ואז לשתף. כדאי לחבר ל״מחזור הבועה״: איפה בגרף הייתם בכל סבב?">
+      <span class="tag">דיון</span>
+      <h2>בואו נדבר על זה</h2>
+      <ol class="steps">
+        <li>באיזה סבב הרגשתם הכי בטוחים? למה?</li>
+        <li>מי קנה בסבב 5 או 7? מה גרם לכם לקנות דווקא אז?</li>
+        <li>מי הרוויח מההייפ באמת? (רמז: לא הקבוצות)</li>
+        <li>מה היה גורם לכם לצאת מוקדם יותר?</li>
+        <li>האם יש הבדל בין ״להשקיע״ לבין ״להמר״? איפה עובר הקו?</li>
+      </ol>
+    </section>
+
+    <section class="slide" data-notes="<b>תרמית או לא? (10 דק').</b> הקבוצות פותחות בטלפון את הלשונית ״תרמית או לא?״ ומקלידות את הקוד. הן מסווגות 8 פוסטים. אחרי כ-4 דקות עוברים כאן על הפוסטים: החץ מציג פוסט, ולחיצה נוספת חושפת את התשובה.">
+      <span class="tag">פעילות</span>
+      <h2>תרמית או לא?</h2>
+      <p class="lead">8 פוסטים. לכל אחד מחליטים: תרמית, חשוד או לגיטימי, ומוכנים להסביר למה.</p>
+      <div><div class="mut big">קוד לפעילות</div><div class="code">777</div></div>
+    </section>
+
+    <section class="slide" id="s-scam" data-notes="<b>חשיפת התשובות.</b> לפני כל חשיפה שואלים קבוצה אחת מה סימנה ולמה.">
+      <span class="tag" id="scN"></span>
+      <div class="post"><div class="who" id="scWho"></div><p id="scText"></p></div>
+      <div id="scAns" hidden><span class="verdict" id="scV"></span><p class="big" id="scWhy" style="margin:12px 0 0"></p></div>
+    </section>
+
+    <section class="slide" data-notes="<b>סיכום סימני האזהרה (3 דק').</b> אפשר לבקש מהתלמידים לצלם את השקופית הזו.">
+      <span class="tag">לצלם ולשמור</span>
+      <h2>6 סימני אזהרה</h2>
+      <div class="grid">
+        <div class="card"><strong>רווח מובטח</strong>אף אחד לא יכול להבטיח רווח. מי שמבטיח, משקר.</div>
+        <div class="card"><strong>לחץ זמן</strong>״רק עכשיו!״, ״נשארו 10 מקומות״.</div>
+        <div class="card"><strong>מי מאחורי זה?</strong>צוות אנונימי, או מייסדים שמחזיקים את רוב המטבעות.</div>
+        <div class="card"><strong>אינפלואנסר בלי גילוי</strong>פרסום בלי #ad, הרבה אימוג'י ואפס מידע.</div>
+        <div class="card"><strong>מחיקת שאלות</strong>קבוצה שמוחקת ביקורת היא לא קהילה. היא מכירה.</div>
+        <div class="card"><strong>״שלחו כסף כדי לקבל כסף״</strong>הגרלות, הכפלות, ״אמתו את הסיסמה״.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-notes="<b>כרטיס יציאה (7 דק').</b> כל תלמיד עונה בטלפון שלו. אפשר גם טלפון אחד לזוג. הקוד פותח את הלשונית ״כרטיס יציאה״. אחרי 5 שאלות יש שאלה פתוחה, ובסוף התלמיד מראה לך את המסך ביציאה מהכיתה.">
+      <span class="tag">כרטיס יציאה</span>
+      <h2>5 שאלות ושאלה אחת אישית</h2>
+      <div class="post"><div class="who">הודעה מחבר בוואטסאפ</div><p>״אחי יש מטבע חדש, הולך לעלות פי 100!! תכנס עכשיו לפני שמאוחר מדי 🚀🚀״</p></div>
+      <p class="lead">מה תענו לו? מנסחים תשובה בטלפון ומראים למורה ביציאה.</p>
+      <div><div class="mut big">קוד לכרטיס היציאה</div><div class="code">888</div></div>
+    </section>
+
+    <section class="slide" id="s-quiz" data-notes="<b>מעבר על החידון (אופציונלי).</b> אם נשאר זמן, עוברים על התשובות.">
+      <span class="tag" id="qzN"></span>
+      <h2 id="qzQ"></h2>
+      <div class="opts" id="qzO"></div>
+      <p class="big" id="qzWhy" hidden></p>
+    </section>
+
+    <section class="slide pinkbg" data-notes="<b>סגירה.</b> המסר הוא לא ״קריפטו זה רע״, אלא לחשוב לפני שקונים.">
+      <h2 style="font-size:clamp(40px,6vw,92px)">לפני שקונים,<br>שואלים שאלה אחת:</h2>
+      <p class="lead" style="font-size:clamp(28px,3.4vw,52px);font-weight:700">מי מרוויח מזה שאני קונה?</p>
+    </section>
+
+  </div>
+  <div class="notes" id="notes"></div>
+  <div class="foot">
+    <button class="nav" id="bPrev">→ הקודם</button>
+    <span class="mut" id="stepInfo"></span>
+    <button class="nav" id="bNext">הבא ←</button>
+  </div>
+</div>
+
+<!-- ================= PLAN ================= -->
+<div id="plan" class="view">
+  <p><a href="#">→ חזרה למצגת</a></p>
+  <h1>מערך שיעור: הבועה</h1>
+  <p class="big">כיתה ט' · 90 דקות · 20 תלמידים ב-5 קבוצות · מקרן וטלפון לכל קבוצה</p>
+  <h2>מטרות</h2>
+  <ul class="big">
+    <li>התלמידים יבחינו בין מחיר לערך ויסבירו מה זו בועה.</li>
+    <li>התלמידים יזהו את הפסיכולוגיה של הייפ: FOMO, הוכחה חברתית, הטיית השורד ודחיפות.</li>
+    <li>התלמידים יזהו סימני אזהרה של תרמיות קריפטו (Pump &amp; Dump, Rug Pull, פישינג).</li>
+    <li>התלמידים יחוו קבלת החלטות תחת לחץ חברתי וינתחו אותה.</li>
+  </ul>
+  <h2>חלוקת זמנים</h2>
+  <table>
+    <tr><th>זמן</th><th>שלב</th><th>מה קורה</th></tr>
+    <tr><td>0–8</td><td>הוק</td><td>שקופיות 1–3: גרף ״הייתם קונים?״, הצבעה, חשיפת הקריסה, בועת הצבעונים.</td></tr>
+    <tr><td>8–25</td><td>מצגת</td><td>שקופיות 4–9: קריפטו בקצרה, מחיר מול ערך, מחזור הבועה, פסיכולוגיה, אינפלואנסרים, Pump &amp; Dump.</td></tr>
+    <tr><td>25–30</td><td>חלוקה לקבוצות</td><td>שקופית 10: 5 קבוצות, סריקת QR, בחירת שם.</td></tr>
+    <tr><td>30–57</td><td>המשחק</td><td>שקופית 11: עשרה סבבים של כ-2.5 דקות. מקריאים חדשות, הקבוצות מקלידות קוד ומחליטות.</td></tr>
+    <tr><td>57–62</td><td>תוצאות</td><td>שקופיות 12–13: טבלת מנצחים וחשיפת הרמזים.</td></tr>
+    <tr><td>62–72</td><td>דיון</td><td>שקופית 14: 2–3 שאלות מנחות.</td></tr>
+    <tr><td>72–82</td><td>תרמית או לא?</td><td>שקופיות 15–17: הקבוצות מסווגות 8 פוסטים (קוד 777), חשיפה ו-6 סימני אזהרה.</td></tr>
+    <tr><td>82–90</td><td>כרטיס יציאה</td><td>שקופיות 18–20: חידון אישי (קוד 888), שאלה פתוחה, מסר סיום.</td></tr>
+  </table>
+  <h2>קודים</h2>
+  <p class="big">סבבי המשחק: 418 · 273 · 905 · 362 · 781 · 159 · 634 · 827 · 590 · 346<br>תרמית או לא: 777 · כרטיס יציאה: 888</p>
+  <p class="mut">קבוצה שפספסה סבב יכולה להקליד את הקוד של הסבב הנוכחי ולהמשיך. בסבבים שפספסה היא פשוט ״החזיקה״.</p>
+  <h2>מה התלמידים אמורים לגלות במשחק</h2>
+  <p class="big">המחיר מתוסרט מראש: 1 ₪, ואז עלייה עד שיא של 14 ₪ בסבב 7, ואז קריסה ל-5 אגורות. הרמזים פזורים לאורך הדרך: #ad מוסתר, 60% מהמטבעות אצל המפתחים, שאלות שנמחקות, ושמועה בלי מקור. קבוצה שקראה בעיון ומכרה בסבבים 5–7 יכולה לסיים עם יותר מ-100,000 ₪. קבוצה שנכנסה מאוחר מסיימת קרוב לאפס.</p>
+  <h2>לפני השיעור</h2>
+  <ul class="big">
+    <li>לשתף את הקישור כ״כל מי שיש לו את הקישור״ ולבדוק שהוא נפתח בטלפון שאינו מחובר ל-Claude.</li>
+    <li>לשחק סבב שלם בטלפון שלך, מההתחלה ועד הסוף.</li>
+    <li>לוודא שיש אינטרנט בכיתה (וייפיי או גלישה בטלפונים).</li>
+    <li>מקשים: חצים או רווח לניווט, N להערות, F למסך מלא.</li>
+  </ul>
+  <h2>אם משהו לא עובד</h2>
+  <ul class="big">
+    <li><b>אין אינטרנט לתלמידים:</b> משחקים על דף. כל קבוצה רושמת מזומן ומטבעות, ואחרי כל החלטה מחשבת לבד. זה גם תרגול חשבון.</li>
+    <li><b>תלמיד רענן את הדף:</b> ההתקדמות נשמרת בטלפון. אם היא בכל זאת נמחקה, מתחילים מחדש עם הקוד של הסבב הנוכחי.</li>
+    <li><b>ה-QR לא נסרק:</b> הקישור כתוב מתחת לקוד. שולחים אותו בקבוצת הכיתה.</li>
+  </ul>
+</div>
+
+<!-- ================= STUDENT ================= -->
+<div id="student" class="view">
+  <div class="sh"><b>הבועה</b><span class="mut" id="stGroup"></span></div>
+  <div class="tabs" id="stTabs">
+    <button data-tab="game">המשחק</button>
+    <button data-tab="scam">תרמית או לא?</button>
+    <button data-tab="quiz">כרטיס יציאה</button>
+  </div>
+  <div id="stBody"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+{
+const FALLBACK_URL = "https://claude.ai/artifact/LZLnthdpT4HJAvuKMNmhQg#student";
+const STUDENT_URL = (/^https?:$/.test(location.protocol) && !/claude|anthropic|usercontent/i.test(location.hostname)) ? location.href.split("#")[0] + "#student" : FALLBACK_URL;
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const ils = n => Math.round(n).toLocaleString("he-IL") + " ₪";
+const pr = n => n.toLocaleString("he-IL", {minimumFractionDigits:2, maximumFractionDigits:2}) + " ₪";
+
+const ROUNDS = [
+ {p:1.00, code:"418", src:"טלגרם", t:"נולד מטבע חדש: חתולטורבו ($TCAT). ״המטבע של הדור שלנו! 200 חברים בקבוצה, אתם הכי מוקדמים שיש!״", hint:"מטבע חדש בלי שום מידע על מה הוא עושה. רק התלהבות."},
+ {p:1.80, code:"273", src:"טיקטוק", t:"טיקטוקר עם 50 אלף עוקבים: ״גיליתי מטבע שעוד אף אחד לא מכיר 👀״. הסרטון מגיע ל-300 אלף צפיות.", hint:"למה דווקא הוא ״גילה״ את זה? מי מרוויח מזה שאתם קונים?"},
+ {p:3.50, code:"905", src:"אתר קריפטו", t:"כותרת: ״$TCAT זינק ב-250% בשבוע: המטבע הלוהט של החודש״. בכתבה אין מילה על מה המטבע עושה.", hint:"מחיר שעולה זה לא מידע על ערך."},
+ {p:6.00, code:"362", src:"אינסטגרם", t:"אינפלואנסר עם מיליון עוקבים: ״$TCAT הולך פי 100. אני כבר בפנים 💎🙌״. בסוף הפוסט, באותיות קטנות: ‎#ad", hint:"‎#ad אומר שהוא קיבל כסף על הפוסט."},
+ {p:11.00, code:"781", src:"בהפסקה", t:"כל השכבה מדברת על זה. אח של חבר שלכם מספר שהפך 500 ₪ ל-5,000 ₪. ״מי שלא נכנס עכשיו, פספס.״", hint:"FOMO במלוא הדרו. כשכולם כבר קנו, מי נשאר לקנות?"},
+ {p:9.00, code:"159", src:"טלגרם", t:"המחיר ירד קצת. מנהלי הקבוצה: ״זה רק תיקון! HODL! אל תהיו ידיים חלשות!״. מישהו שואל למה ארנק המפתחים מחזיק 60% מהמטבעות, וההודעה שלו נמחקת.", hint:"60% מהמטבעות אצל המפתחים, ושאלות שנמחקות. דגל אדום ענק."},
+ {p:14.00, code:"634", src:"שמועה", t:"״הדלפה״: $TCAT עומד להיכנס לבורסת קריפטו ענקית! אין שום אישור רשמי, אבל ההודעה מופצת בכל הקבוצות.", hint:"שמועה בלי מקור. השיא של המחיר הוא גם השיא של ההתלהבות."},
+ {p:12.00, code:"827", src:"נתוני הבלוקצ'יין", t:"ארנק המפתחים מתחיל למכור כמויות גדולות. האינפלואנסר מסבב 4 מחק את הפוסט שלו.", hint:"מי שיצר את ההייפ יוצא ראשון."},
+ {p:4.00, code:"590", src:"טלגרם", t:"פאניקה. כולם מנסים למכור באותו רגע. בקבוצה: ״תחזיקו!!! זה רק ניעור!!!״", hint:"כשכולם מוכרים ואין קונים, המחיר צונח."},
+ {p:0.05, code:"346", src:"הסוף", t:"Rug Pull: הצוות נעלם, הקבוצה בטלגרם נמחקה והאתר ירד. אין יותר קונים, ואי אפשר למכור.", hint:"זה בדיוק מה שקרה ב-Squid Game Token ב-2021."}
+];
+const POSTS = [
+ {who:"קבוצת טלגרם · 🚀 MoonPepe Official", t:"$MPEPE יוצא בעוד שעה!!! מי שנכנס ב-5 הדקות הראשונות מקבל פי 50. רק 100 מקומות!!!", a:"scam", why:"רווח מובטח, לחץ זמן ומחסור מלאכותי. שלושה סימני אזהרה בפוסט אחד."},
+ {who:"אינסטגרם · אינפלואנסרית עם 400K עוקבים", t:"קיבלתי ביטקוין מתנה ואני רוצה להחזיר לקהילה 🎁 שלחו 500 ₪ לכתובת בביו ותקבלו פי 2 בחזרה!", a:"scam", why:"״שלחו כסף כדי לקבל כסף״ היא אחת ההונאות הוותיקות ברשת. לרוב גם החשבון עצמו מזויף."},
+ {who:"אתר חדשות כלכלי", t:"ביטקוין ירד ב-15% השבוע. מומחים מזכירים שמדובר בנכס תנודתי מאוד, ושלא כדאי להשקיע כסף שאתם צריכים.", a:"ok", why:"מידע עובדתי, ציון של הסיכון, ואף אחד לא מבקש מכם לעשות שום דבר."},
+ {who:"הודעה פרטית · ״Daniel_Trader״", t:"היי! ראיתי את הפרופיל שלך. אני סוחר מקצועי ואנהל לך את הכסף, 30% רווח בחודש מובטח. רק תוריד את האפליקציה בקישור 👇", a:"scam", why:"זר שפונה אליכם, ״רווח מובטח״ ואפליקציה לא מוכרת. 30% בחודש זה דבר שלא קיים."},
+ {who:"טיקטוק · ערוץ הסברים", t:"מה זה בלוקצ'יין ב-60 שניות. בלי המלצות ובלי קישורים, רק הסבר.", a:"ok", why:"תוכן לימודי שלא מוכר כלום ולא מבקש כסף."},
+ {who:"אינסטגרם · אינפלואנסר עם מיליון עוקבים", t:"המטבע הזה ישנה את העולם. אני כבר בפנים 💎🙌 #שיתוף_פעולה", a:"sus", why:"כתוב ״שיתוף פעולה״, כלומר הוא קיבל כסף. אין שום מידע אמיתי. לא בהכרח תרמית, אבל אין סיבה לסמוך."},
+ {who:"SMS · ״Crypto-Exchange-Support״", t:"החשבון שלך בבורסה ננעל! לחץ כאן ואמת את הסיסמה תוך 24 שעות, אחרת הכסף יימחק.", a:"scam", why:"פישינג. אף חברה רצינית לא מבקשת סיסמה בקישור, והאיום והדחיפות הם הסימן."},
+ {who:"אתר של מטבע חדש", t:"הצוות שלנו אנונימי מטעמי פרטיות. 70% מהמטבעות אצל המייסדים. אל דאגה, אנחנו פה לטווח ארוך!", a:"sus", why:"צוות אנונימי ושליטה ב-70% מהמטבעות. זה בדיוק המבנה שמאפשר Rug Pull."}
+];
+const LBL = {scam:"תרמית", sus:"חשוד", ok:"לגיטימי"};
+const QUIZ = [
+ {q:"מה ההבדל בין מחיר לערך?", o:["אין הבדל, אלו מילים נרדפות","מחיר הוא כמה משלמים עכשיו, וערך הוא מה הדבר באמת נותן","ערך הוא תמיד גבוה מהמחיר","מחיר נקבע על ידי הממשלה"], a:1, why:"בבועה המחיר מתנתק מהערך."},
+ {q:"מה זה Rug Pull?", o:["כשמחיר מטבע עולה מהר","סוג של ארנק דיגיטלי","כשיוצרי המטבע נעלמים עם הכסף והמחיר צונח לאפס","הורדת עמלות בבורסה"], a:2, why:"״מושכים את השטיח״ מתחת לרגליים של המשקיעים."},
+ {q:"אינפלואנסר מקדם מטבע ולא מציין שקיבל כסף. מה הבעיה?", o:["אין בעיה, זו דעה אישית","העוקבים חושבים שזו המלצה אמיתית, אבל זו פרסומת","זה בסדר אם יש לו הרבה עוקבים","הבעיה היחידה היא איכות הסרטון"], a:1, why:"בגלל זה קים קרדשיאן נקנסה ב-1.26 מיליון דולר."},
+ {q:"מטבע עלה ב-500% בשבוע האחרון. מה הכי נכון להסיק?", o:["שהוא ימשיך לעלות","שזה מטבע איכותי","שהייתה עליו הרבה קנייה לאחרונה, וזה לא אומר כלום על השבוע הבא","שכדאי לקנות לפני שיהיה מאוחר מדי"], a:2, why:"ביצועי עבר לא מנבאים את העתיד. ״לפני שיהיה מאוחר מדי״ זה FOMO."},
+ {q:"איזה מהבאים הוא לא סימן אזהרה?", o:["״רווח מובטח של 20% בחודש״","״נשארו רק 10 מקומות!״","האתר מפרט בבירור את הסיכונים ומי עומד מאחורי הפרויקט","הקבוצה מוחקת שאלות ביקורתיות"], a:2, why:"שקיפות לגבי סיכונים ואנשים היא סימן טוב, גם אם היא לא מבטיחה כלום."}
+];
+
+const store = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+};
+
+function route(){
+  const h = location.hash.slice(1);
+  const v = h === "student" ? "student" : h === "plan" ? "plan" : "teacher";
+  document.querySelectorAll(".view").forEach(el => el.classList.toggle("on", el.id === v));
+  if (v === "student") renderStudent();
+  window.scrollTo(0,0);
+}
+
+/* ---------- QR ---------- */
+function makeQR(id){
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!STUDENT_URL){ el.textContent = "הקישור לתלמידים יופיע כאן"; return; }
+  if (typeof QRCode === "function"){
+    el.innerHTML = "";
+    new QRCode(el, {text: STUDENT_URL, width: 220, height: 220, colorDark:"#1e0f3a", colorLight:"#ffffff"});
+    const u = document.createElement("div"); u.style.cssText = "margin-top:8px;font-size:13px;direction:ltr;word-break:break-all;max-width:220px"; u.textContent = STUDENT_URL; el.appendChild(u);
+  } else {
+    el.textContent = STUDENT_URL;
+  }
+}
+
+/* ---------- teacher slides ---------- */
+const slides = [...document.querySelectorAll(".slide")];
+let cur = 0, showHint = false;
+const stepAt = {};
+
+function hookRender(i){
+  const W = 900, H = 340;
+  const up = [[20,320],[120,318],[220,312],[320,300],[420,280],[500,250],[570,200],[630,150],[680,100],[720,60],[750,30]];
+  const pts = i ? up.concat([[760,250],[775,325],[880,330]]) : up;
+  const d = pts.map((p,k) => (k ? "L" : "M") + p[0] + " " + p[1]).join(" ");
+  $("#hookSvg").innerHTML = '<line x1="20" y1="330" x2="'+W+'" y2="330" stroke="currentColor" stroke-opacity=".25" stroke-width="2"/>' +
+    '<path d="'+d+'" fill="none" stroke="'+(i ? "#e0243c" : "#12a150")+'" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>' +
+    (i ? '<text x="770" y="200" font-size="30" font-weight="900" fill="#e0243c" text-anchor="middle" font-family="Rubik,Arial">💥 10 דקות</text>' : '');
+  $("#hookH").textContent = i ? "...ואז זה קרה." : "הייתם קונים?";
+  $("#hookP").textContent = i ? "בתוך דקות המחיר צנח לכמעט אפס, ומי שקנה לא הצליח אפילו למכור. זה קרה באמת, ב-2021." : "מ-1 ₪ ל-1,000 ₪ בתוך שבועות. כל החברים שלכם כבר בפנים.";
+  $("#hookTag").textContent = i ? "מבוסס על מקרה אמיתי" : "מטבע חדש · השבועות האחרונים";
+}
+
+function gameRender(i){
+  const r = ROUNDS[i], prev = i ? ROUNDS[i-1].p : null;
+  $("#gRound").textContent = "סבב " + (i+1) + " מתוך 10";
+  $("#gSrc").textContent = "מקור: " + r.src;
+  $("#gText").textContent = r.t;
+  $("#gPrice").textContent = pr(r.p);
+  if (prev === null){ $("#gChg").textContent = "מחיר פתיחה"; $("#gChg").className = "chg mut"; }
+  else { const c = (r.p/prev - 1) * 100; $("#gChg").textContent = (c >= 0 ? "▲ +" : "▼ ") + c.toFixed(0) + "%"; $("#gChg").className = "chg " + (c >= 0 ? "up" : "down"); }
+  $("#gCode").textContent = r.code;
+  $("#gHint").textContent = "💡 " + r.hint;
+  $("#gHint").hidden = !showHint;
+  $("#bHint").textContent = showHint ? "הסתר רמז" : "הצג רמז";
+  const max = 15, W = 400, H = 200;
+  const pts = ROUNDS.slice(0, i+1).map((x,k) => [20 + k*(W-40)/9, H - 15 - (x.p/max)*(H-30)]);
+  const d = pts.map((p,k) => (k ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+  const last = pts[pts.length-1];
+  $("#gSvg").innerHTML = '<line x1="20" y1="'+(H-15)+'" x2="'+(W-20)+'" y2="'+(H-15)+'" stroke="currentColor" stroke-opacity=".25" stroke-width="2"/>' +
+    '<path d="'+d+'" fill="none" stroke="#ff3d7f" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>' +
+    '<circle cx="'+last[0]+'" cy="'+last[1]+'" r="8" fill="#ff3d7f"/>';
+}
+
+function scamRender(i){
+  const k = i >> 1, rev = i % 2 === 1, p = POSTS[k];
+  $("#scN").textContent = "פוסט " + (k+1) + " מתוך " + POSTS.length;
+  $("#scWho").textContent = p.who;
+  $("#scText").textContent = p.t;
+  $("#scAns").hidden = !rev;
+  $("#scV").textContent = LBL[p.a];
+  $("#scV").className = "verdict v-" + p.a;
+  $("#scWhy").textContent = p.why;
+}
+
+function quizRender(i){
+  const k = i >> 1, rev = i % 2 === 1, q = QUIZ[k];
+  $("#qzN").textContent = "שאלה " + (k+1) + " מתוך " + QUIZ.length;
+  $("#qzQ").textContent = q.q;
+  $("#qzO").innerHTML = q.o.map((o,j) => '<div class="opt'+(rev && j === q.a ? " right" : "")+'">'+esc(o)+'</div>').join("");
+  $("#qzWhy").hidden = !rev;
+  $("#qzWhy").textContent = q.why;
+}
+
+const STEP = {
+  "s-hook": {n:2, render:hookRender},
+  "s-game": {n:ROUNDS.length, render:gameRender},
+  "s-scam": {n:POSTS.length*2, render:scamRender},
+  "s-quiz": {n:QUIZ.length*2, render:quizRender}
+};
+
+function go(i){
+  cur = Math.max(0, Math.min(slides.length-1, i));
+  slides.forEach((s,k) => s.classList.toggle("on", k === cur));
+  const s = slides[cur], st = STEP[s.id];
+  if (st){ stepAt[s.id] = stepAt[s.id] || 0; st.render(stepAt[s.id]); }
+  $("#counter").textContent = (cur+1) + " / " + slides.length;
+  $("#notes").innerHTML = s.dataset.notes || "";
+  $("#stepInfo").textContent = st ? ("שלב " + (stepAt[s.id]+1) + " / " + st.n) : "";
+  store.set("bubble-slide", cur);
+}
+function next(){
+  const s = slides[cur], st = STEP[s.id];
+  if (st && stepAt[s.id] < st.n-1){ stepAt[s.id]++; go(cur); } else go(cur+1);
+}
+function prev(){
+  const s = slides[cur], st = STEP[s.id];
+  if (st && stepAt[s.id] > 0){ stepAt[s.id]--; go(cur); } else go(cur-1);
+}
+
+$("#bNext").addEventListener("click", next);
+$("#bPrev").addEventListener("click", prev);
+$("#bNotes").addEventListener("click", () => $("#notes").classList.toggle("on"));
+$("#bHint").addEventListener("click", () => { showHint = !showHint; gameRender(stepAt["s-game"] || 0); });
+function toggleFull(){
+  try {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen().catch(() => {});
+  } catch(e){}
+}
+$("#bFull").addEventListener("click", toggleFull);
+document.addEventListener("keydown", e => {
+  if (!$("#teacher").classList.contains("on")) return;
+  if (e.target.matches("input,textarea")) return;
+  if (["ArrowLeft"," ","PageDown","Enter"].includes(e.key)){ e.preventDefault(); next(); }
+  else if (["ArrowRight","PageUp","Backspace"].includes(e.key)){ e.preventDefault(); prev(); }
+  else if (e.key === "n" || e.key === "N" || e.key === "מ"){ $("#notes").classList.toggle("on"); }
+  else if (e.key === "f" || e.key === "F" || e.key === "כ"){ toggleFull(); }
+});
+
+/* leaderboard */
+let lbData = store.get("bubble-lb") || [1,2,3,4,5].map(n => ({name:"קבוצה " + n, v:""}));
+$("#lbIn").innerHTML = lbData.map((g,k) =>
+  '<div><input id="lbn'+k+'" aria-label="שם קבוצה" value="'+esc(g.name)+'"><input id="lbv'+k+'" inputmode="numeric" aria-label="סכום סופי" placeholder="₪" value="'+esc(g.v)+'"></div>').join("");
+function lbRender(){
+  const rows = lbData.filter(g => g.v !== "" && !isNaN(+g.v)).map(g => ({name:g.name, v:+g.v})).sort((a,b) => b.v - a.v);
+  const max = Math.max(10000, ...rows.map(r => r.v));
+  $("#lb").innerHTML = rows.length ? rows.map((r,k) =>
+    '<div class="lbrow"><span>'+(k === 0 ? "🏆 " : "")+esc(r.name)+'</span><div class="bar" style="width:'+Math.max(2, r.v/max*100)+'%;background:'+(r.v >= 10000 ? "#12a150" : "#e0243c")+'"></div><b style="white-space:nowrap">'+ils(r.v)+'</b></div>').join("") +
+    '<p class="mut big" style="margin:4px 0 0">ירוק: סיימו ברווח · אדום: סיימו בהפסד (התחלה: 10,000 ₪)</p>'
+    : '<p class="mut big">הקלידו את הסכום הסופי של כל קבוצה.</p>';
+}
+$("#lbIn").addEventListener("input", e => {
+  const m = e.target.id.match(/^lb([nv])(\d)$/); if (!m) return;
+  if (m[1] === "n") lbData[+m[2]].name = e.target.value;
+  else lbData[+m[2]].v = e.target.value.replace(/[^\d.]/g, "");
+  store.set("bubble-lb", lbData); lbRender();
+});
+lbRender();
+
+$("#hintsAll").innerHTML = ROUNDS.map((r,k) => '<div class="card" style="font-size:clamp(16px,1.3vw,21px)"><strong>סבב '+(k+1)+' · '+pr(r.p)+'</strong>'+esc(r.hint)+'</div>').join("");
+
+/* ---------- student ---------- */
+const fresh = () => ({g:"", cash:10000, coins:0, r:-1, done:{}, peak:10000, peakR:-1, tab:"game", scamU:false, quizU:false, scam:{}, scamChecked:false, quiz:{}, quizChecked:false, exit:"", exitDone:false});
+let st = Object.assign(fresh(), store.get("bubble-student") || {});
+let errMsg = "", resetArm = false;
+const save = () => store.set("bubble-student", st);
+const valueAt = p => st.cash + st.coins * p;
+
+function codeBox(label, act){
+  return '<div class="box"><h3>'+label+'</h3><input id="codeIn" inputmode="numeric" maxlength="3" placeholder="קוד מהמסך" autocomplete="off"><button class="pri" data-act="'+act+'">אישור</button><div class="err">'+esc(errMsg)+'</div></div>';
+}
+function pfBox(p){
+  return '<div class="pf"><div><small>מזומן</small><span>'+ils(st.cash)+'</span></div><div><small>מטבעות</small><span>'+Math.floor(st.coins).toLocaleString("he-IL")+'</span></div><div><small>שווי כולל</small><span>'+ils(valueAt(p))+'</span></div></div>';
+}
+
+function gameView(){
+  if (!st.g) return '<div class="box"><h3>ברוכים הבאים לשוק הבועה</h3><p>יש לכם 10,000 ₪ וירטואליים ו-10 סבבים. בחרו שם לקבוצה:</p><input id="gName" maxlength="20" placeholder="שם הקבוצה"><button class="pri" data-act="name">יאללה</button><div class="err">'+esc(errMsg)+'</div></div>';
+  if (st.r < 0) return '<div class="box">'+pfBox(1)+'</div>' + codeBox("חכו לקוד של סבב 1 מהמסך", "code");
+  const r = ROUNDS[st.r];
+  let h = '<div class="box"><div class="mut">סבב '+(st.r+1)+' מתוך 10 · '+esc(r.src)+'</div><p class="sp-news" style="font-size:18px">'+esc(r.t)+'</p><div style="font-size:30px;font-weight:900;direction:ltr;text-align:right">'+pr(r.p)+'</div>'+pfBox(r.p)+'</div>';
+  if (st.r === ROUNDS.length - 1){
+    const fin = valueAt(r.p), diff = fin - 10000;
+    h += '<div class="box"><h3>המשחק נגמר</h3><p style="font-size:15px" class="mut">המסחר הוקפא, והמטבעות שלכם שווים 5 אגורות כל אחד.</p><div style="font-size:40px;font-weight:900;color:'+(diff >= 0 ? "var(--ok)" : "var(--bad)")+'">'+ils(fin)+'</div><p>'+(diff >= 0 ? "סיימתם ברווח של "+ils(diff)+". יצאתם מהבועה בזמן." : "הפסדתם "+ils(-diff)+". הבועה התפוצצה כשהייתם בפנים.")+'</p>' +
+      '<p>השווי הגבוה ביותר שהיה לכם: <b>'+ils(st.peak)+'</b>'+(st.peakR >= 0 ? " (בסבב "+(st.peakR+1)+")" : "")+'.</p><p><b>דווחו למורה את הסכום הסופי.</b></p>' +
+      '<div class="mut" style="font-size:15px">מה עשיתם בכל סבב:</div><ol class="hist">'+ROUNDS.slice(0,9).map((x,k) => '<li>'+pr(x.p)+": "+esc(st.done[k] || "פספסתם, ולכן החזקתם")+'</li>').join("")+'</ol></div>';
+    return h;
+  }
+  if (!st.done[st.r]){
+    h += '<div class="box"><h3>מה אתם עושים?</h3><div class="acts">' +
+      '<button class="buy" data-act="buy" data-f=".25">קנו 25%</button><button class="buy" data-act="buy" data-f=".5">קנו 50%</button><button class="buy" data-act="buy" data-f="1">קנו הכל</button>' +
+      '<button class="sell" data-act="sell" data-f=".25">מכרו 25%</button><button class="sell" data-act="sell" data-f=".5">מכרו 50%</button><button class="sell" data-act="sell" data-f="1">מכרו הכל</button>' +
+      '<button class="hold" data-act="hold">מחזיקים, לא עושים כלום</button></div><p class="mut" style="font-size:14px;margin:8px 0 0">״קנו״ = אחוז מהמזומן. ״מכרו״ = אחוז מהמטבעות. החלטה אחת בכל סבב.</p></div>';
+  } else {
+    h += '<div class="box" style="font-weight:700">✓ ההחלטה ננעלה: '+esc(st.done[st.r])+'</div>' + codeBox("חכו לקוד של סבב "+(st.r+2)+" מהמסך", "code");
+  }
+  return h;
+}
+
+function scamView(){
+  if (!st.scamU) return codeBox("הקלידו את הקוד של הפעילות", "ucode");
+  const all = POSTS.every((p,k) => st.scam[k]);
+  let h = '<p class="mut">לכל פוסט בחרו: תרמית, חשוד או לגיטימי.</p>';
+  POSTS.forEach((p,k) => {
+    const sel = st.scam[k];
+    h += '<div class="box"><div class="mut" style="font-size:14px">'+(k+1)+'. '+esc(p.who)+'</div><p class="sp-news" style="margin:6px 0 0">'+esc(p.t)+'</p>';
+    if (st.scamChecked){
+      const ok = sel === p.a;
+      h += '<div class="res" style="color:'+(ok ? "var(--ok)" : "var(--bad)")+'">'+(ok ? "✓ נכון" : "✗ סימנתם "+LBL[sel]+". התשובה: "+LBL[p.a])+'</div><p style="font-size:15px;margin:4px 0 0">'+esc(p.why)+'</p>';
+    } else {
+      h += '<div class="chs">'+["scam","sus","ok"].map(a => '<button data-act="scam" data-k="'+k+'" data-a="'+a+'" class="'+(sel === a ? "sel" : "")+'">'+LBL[a]+'</button>').join("")+'</div>';
+    }
+    h += '</div>';
+  });
+  if (st.scamChecked){
+    const score = POSTS.filter((p,k) => st.scam[k] === p.a).length;
+    h = '<div class="box"><h3>'+score+' מתוך '+POSTS.length+'</h3><p style="margin:0">'+(score >= 7 ? "עין חדה! אתם מזהים עוקץ ממרחק." : score >= 5 ? "לא רע. שימו לב לפוסטים שפספסתם." : "הרמאים היו נהנים מכם 😅. קראו את ההסברים.")+'</p></div>' + h;
+  } else {
+    h += '<button class="pri" data-act="scamcheck" '+(all ? "" : "disabled style=\"opacity:.5\"")+'>בדקו את התשובות</button>';
+  }
+  return h;
+}
+
+function quizView(){
+  if (!st.quizU) return codeBox("הקלידו את הקוד של כרטיס היציאה", "ucode2");
+  let h = "";
+  QUIZ.forEach((q,k) => {
+    h += '<div class="box"><b>'+(k+1)+'. '+esc(q.q)+'</b>';
+    q.o.forEach((o,j) => {
+      let cls = "qopt";
+      if (st.quizChecked){ if (j === q.a) cls += " right"; else if (st.quiz[k] === j) cls += " wrong"; }
+      else if (st.quiz[k] === j) cls += " sel";
+      h += '<button class="'+cls+'" data-act="quiz" data-k="'+k+'" data-j="'+j+'" '+(st.quizChecked ? "disabled" : "")+'>'+esc(o)+'</button>';
+    });
+    if (st.quizChecked) h += '<p style="font-size:15px;margin:8px 0 0">'+esc(q.why)+'</p>';
+    h += '</div>';
+  });
+  if (!st.quizChecked){
+    const all = QUIZ.every((q,k) => st.quiz[k] !== undefined);
+    return h + '<button class="pri" data-act="quizcheck" '+(all ? "" : "disabled style=\"opacity:.5\"")+'>בדקו</button>';
+  }
+  const score = QUIZ.filter((q,k) => st.quiz[k] === q.a).length;
+  let top = '<div class="box"><h3>ציון: '+score+' / '+QUIZ.length+'</h3></div>';
+  let ex = '<div class="box"><h3>שאלה אחרונה, אישית</h3><p class="sp-news">חבר שולח לך: ״אחי יש מטבע חדש, הולך לעלות פי 100!! תכנס עכשיו לפני שמאוחר מדי 🚀🚀״</p><p>מה תענה לו? (לפחות משפט אחד עם סיבה)</p>';
+  if (st.exitDone) ex += '<p style="font-size:20px;font-weight:700;background:var(--bg);padding:12px;border-radius:12px">'+esc(st.exit)+'</p><p class="mut">הראו את המסך הזה למורה ביציאה מהכיתה. ציון: '+score+'/'+QUIZ.length+'</p></div>';
+  else ex += '<textarea id="exitIn" rows="4" placeholder="התשובה שלי...">'+esc(st.exit)+'</textarea><button class="pri" data-act="exit">סיימתי</button><div class="err">'+esc(errMsg)+'</div></div>';
+  return top + ex + h;
+}
+
+function renderStudent(){
+  document.querySelectorAll("#stTabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === st.tab));
+  $("#stGroup").textContent = st.g ? "קבוצת " + st.g : "";
+  let h = st.tab === "scam" ? scamView() : st.tab === "quiz" ? quizView() : gameView();
+  h += '<p style="text-align:center;margin-top:24px"><button class="reset" data-act="reset">'+(resetArm ? "לחצו שוב כדי למחוק הכל ולהתחיל מחדש" : "התחלה מחדש")+'</button></p>';
+  $("#stBody").innerHTML = h;
+}
+
+$("#stTabs").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  st.tab = b.dataset.tab; errMsg = ""; resetArm = false; save(); renderStudent();
+});
+
+$("#stBody").addEventListener("click", e => {
+  const b = e.target.closest("button[data-act]"); if (!b || b.disabled) return;
+  const act = b.dataset.act;
+  if (act !== "reset") resetArm = false;
+  errMsg = "";
+  if (act === "name"){
+    const v = ($("#gName").value || "").trim();
+    if (!v){ errMsg = "צריך שם לקבוצה"; } else { st.g = v; }
+  } else if (act === "code"){
+    const v = ($("#codeIn").value || "").trim();
+    const k = ROUNDS.findIndex((r,idx) => idx > st.r && r.code === v);
+    if (k < 0){ errMsg = ROUNDS.findIndex(r => r.code === v) >= 0 ? "את הסבב הזה כבר עברתם" : "קוד לא נכון, נסו שוב"; }
+    else {
+      st.r = k;
+      const val = valueAt(ROUNDS[k].p);
+      if (val > st.peak){ st.peak = val; st.peakR = k; }
+      window.scrollTo(0,0);
+    }
+  } else if (act === "buy" || act === "sell" || act === "hold"){
+    const p = ROUNDS[st.r].p, f = +b.dataset.f;
+    if (act === "buy"){
+      if (st.cash < 1){ errMsg = "אין לכם מזומן"; renderStudent(); return; }
+      const spend = st.cash * f; st.coins += spend / p; st.cash -= spend;
+      st.done[st.r] = "קניתם ב-" + ils(spend);
+    } else if (act === "sell"){
+      if (st.coins < 0.0001){ errMsg = "אין לכם מטבעות למכור"; renderStudent(); return; }
+      const q = st.coins * f; st.cash += q * p; st.coins -= q;
+      st.done[st.r] = "מכרתם ב-" + ils(q * p);
+    } else st.done[st.r] = "החזקתם";
+  } else if (act === "ucode"){
+    if (($("#codeIn").value || "").trim() === "777") st.scamU = true; else errMsg = "קוד לא נכון";
+  } else if (act === "ucode2"){
+    if (($("#codeIn").value || "").trim() === "888") st.quizU = true; else errMsg = "קוד לא נכון";
+  } else if (act === "scam"){
+    st.scam[b.dataset.k] = b.dataset.a;
+  } else if (act === "scamcheck"){
+    st.scamChecked = true; window.scrollTo(0,0);
+  } else if (act === "quiz"){
+    st.quiz[b.dataset.k] = +b.dataset.j;
+  } else if (act === "quizcheck"){
+    st.quizChecked = true; window.scrollTo(0,0);
+  } else if (act === "exit"){
+    const v = ($("#exitIn").value || "").trim();
+    if (v.length < 5){ errMsg = "כתבו לפחות משפט אחד"; st.exit = v; }
+    else { st.exit = v; st.exitDone = true; }
+  } else if (act === "reset"){
+    if (!resetArm){ resetArm = true; renderStudent(); return; }
+    resetArm = false; st = fresh();
+  }
+  save(); renderStudent();
+});
+$("#stBody").addEventListener("keydown", e => {
+  if (e.key !== "Enter" || e.target.tagName !== "INPUT") return;
+  const b = e.target.parentElement.querySelector("button[data-act]");
+  if (b) b.click();
+});
+
+/* ---------- init ---------- */
+makeQR("qr2");
+const saved = store.get("bubble-slide");
+go(typeof saved === "number" ? saved : 0);
+window.addEventListener("hashchange", route);
+route();
+}
+</script>
+</body>
+</html>
